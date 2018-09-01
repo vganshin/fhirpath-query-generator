@@ -24,6 +24,7 @@
   ([value] {:type :integer :value value}))
 
 (def simple-expressions [{:type :string :value "wow"}
+                         {:type :ident :value "name"}
                          (gen-int 0)
                          (gen-int -1)
                          (gen-int 1)
@@ -34,7 +35,10 @@
 (def iif-spec
   {:name "iif"
    :args [{:type :expression}
-          {:type :expression}
+          {:type :expression
+           :optional true}
+          {:type :expression
+           :optional true}
           {:type :expression
            :optional true}]})
 
@@ -43,7 +47,6 @@
     (conj simple-expressions nil)
     simple-expressions))
 
-;; there is can be only one optional arg (the last one).
 (defn gen-valid-funcs [input-expr spec]
   (let [args (mapv #(remove nil? %)
                    (apply combo/cartesian-product
@@ -97,9 +100,6 @@
        ")"))
 
 ; (fhirpath-query-str {:type :operator :left-expr {:type :string :value "ws"} :operator "-" :right-expr {:type :operator :left-expr {:type :integer :value 1} :operator "*" :right-expr {:type :integer :value 2}}})
-
-
-(println (fhirpath-query-str {:type :function, :input-expr {:type :string, :value "Patient"} :name "iif", :args '({:type :string, :value "wow"} {:type :string, :value "wow"} {:type :string, :value "wow"})}))
 
 (defn -main [& args]
   (println (s/join "\n" (map fhirpath-query-str (gen-valid-funcs {:type :ident :value "Root"} iif-spec)))))
